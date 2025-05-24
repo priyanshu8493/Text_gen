@@ -4,10 +4,10 @@ from transformers import pipeline
 import numpy as np # Ensure NumPy is explicitly imported
 import logging
 import requests
-import ollama
+
 from django.views.decorators.csrf import csrf_exempt
 import json
-from ollama import Client
+
 from django.http import StreamingHttpResponse
 import google.generativeai as genai
 from django.http import JsonResponse
@@ -33,30 +33,20 @@ genai.configure(api_key = GEMINI_API_KEY)
 # Load Gemini Pro model
 model = genai.GenerativeModel('gemini-2.0-flash')
 
+
+
 @csrf_exempt
 def generate_text(request):
-
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             prompt = data.get('prompt', '')
 
-            
-
             response = model.generate_content(prompt)
+            return JsonResponse({'text': response.text.strip()})
 
-            #return JsonResponse({'response': response.text})
-        
-            clean_text = response.text.strip()
-            return HttpResponse(clean_text, content_type="text/plain")
-        
-
-        
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
     else:
         return JsonResponse({'error': 'Invalid request method.'}, status=400)
-
-
-
 

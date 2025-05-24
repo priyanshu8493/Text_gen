@@ -19,12 +19,12 @@
     </div>
 
     <script>
-    document.getElementById("generateBtn").addEventListener("click", async () => {
-        const prompt = document.getElementById("prompt").value;
-        const responseDiv = document.getElementById("response");
+document.getElementById("generateBtn").addEventListener("click", async () => {
+    const prompt = document.getElementById("prompt").value;
+    const responseDiv = document.getElementById("response");
+    responseDiv.textContent = "⏳ Generating...";
 
-        responseDiv.textContent = "⏳ Generating...";
-
+    try {
         const res = await fetch("https://server.aimliedc.tech/text-generator/generate_text/", {
             method: "POST",
             headers: {
@@ -33,42 +33,50 @@
             },
             body: JSON.stringify({ prompt })
         });
-        const text = await res.text();
-        responseDiv.textContent = text.trim();
 
         if (!res.ok) {
             responseDiv.textContent = "❌ Error: " + res.statusText;
             return;
         }
 
-        responseDiv.textContent = "";
+        const data = await res.json();
+        const fullText = data.text;
+        responseDiv.textContent = "";  // clear loading message
 
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder("utf-8");
+        // Simulate typing effect
+        let index = 0;
+        const interval = setInterval(() => {
+            if (index < fullText.length) {
+                responseDiv.textContent += fullText.charAt(index);
+                index++;
+            } else {
+                clearInterval(interval);
+            }
+        }, 25); // typing speed (ms per char)
 
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            responseDiv.textContent += decoder.decode(value, { stream: true });
-        }
-    });
+    } catch (error) {
+        console.error(error);
+        responseDiv.textContent = "❌ Network error or server issue.";
+    }
+});
 
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let cookie of cookies) {
-                cookie = cookie.trim();
-                if (cookie.startsWith(name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.slice(name.length + 1));
-                    break;
-                }
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.slice(name.length + 1));
+                break;
             }
         }
-        return cookieValue;
     }
+    return cookieValue;
+}
 </script>
 
 
 </body>
+
 </html>
