@@ -33,6 +33,8 @@
             },
             body: JSON.stringify({ prompt })
         });
+        const text = await res.text();
+        responseDiv.textContent = text.trim();
 
         if (!res.ok) {
             responseDiv.textContent = "❌ Error: " + res.statusText;

@@ -1,5 +1,4 @@
 from django.shortcuts import render
-from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from transformers import pipeline
 import numpy as np # Ensure NumPy is explicitly imported
@@ -10,31 +9,54 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 from ollama import Client
 from django.http import StreamingHttpResponse
+import google.generativeai as genai
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+import os
+from django.http import JsonResponse
+from django.http import HttpResponse
+
+
+GEMINI_API_KEY = "AIzaSyCNbdDb9FsvXA8B2Gn_qzhQSxmuTHo_ifA"
+
+
 
 
 def index(request):
     return render(request, "home.html")
 
 
-client = Client()
+
+genai.configure(api_key = GEMINI_API_KEY)
+
+# Load Gemini Pro model
+model = genai.GenerativeModel('gemini-2.0-flash')
 
 @csrf_exempt
 def generate_text(request):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        prompt = data.get("prompt", "")
 
-        def generate():
-            try:
-                response = client.chat(
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            prompt = data.get('prompt', '')
 
-                    model='llama3',  # choose your model after pulling through ollama
-                    messages=[{"role": "user", "content": prompt}],
-                    stream=True
-                )
-                for chunk in response:
-                    yield chunk['message']['content']
-            except Exception as e:
-                yield f"\n[ERROR] {str(e)}"
+            
 
-        return StreamingHttpResponse(generate(), content_type="text/plain")
+            response = model.generate_content(prompt)
+
+            #return JsonResponse({'response': response.text})
+        
+            clean_text = response.text.strip()
+            return HttpResponse(clean_text, content_type="text/plain")
+        
+
+        
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    else:
+        return JsonResponse({'error': 'Invalid request method.'}, status=400)
+
+
+
+
