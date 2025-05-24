@@ -2,81 +2,417 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>AI Text Generator</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Text Assistant</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0071e3;
+            --primary-dark: #0058b9;
+            --primary-light: #e0f0ff;
+            --accent: #ff9500;
+            --success: #34c759;
+            --warning: #ff9f0a;
+            --error: #ff3b30;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --spacing-1: 4px;
+            --spacing-2: 8px;
+            --spacing-3: 12px;
+            --spacing-4: 16px;
+            --spacing-5: 20px;
+            --spacing-6: 24px;
+            --spacing-8: 32px;
+            --spacing-10: 40px;
+            --spacing-12: 48px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--gray-100);
+            color: var(--gray-800);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: var(--spacing-4);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            padding: var(--spacing-8);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin: var(--spacing-8) 0;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: var(--spacing-6);
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: var(--spacing-2);
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: var(--gray-600);
+            font-weight: 400;
+        }
+
+        .input-group {
+            margin-bottom: var(--spacing-4);
+        }
+
+        textarea {
+            width: 100%;
+            padding: var(--spacing-4);
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 1rem;
+            color: var(--gray-800);
+            background-color: var(--gray-50);
+            resize: vertical;
+            min-height: 120px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.2);
+        }
+
+        textarea::placeholder {
+            color: var(--gray-400);
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: var(--spacing-4) var(--spacing-6);
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        button:hover {
+            background-color: var(--primary-dark);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .response-container {
+            margin-top: var(--spacing-6);
+            padding: var(--spacing-4);
+            background-color: var(--gray-50);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--gray-200);
+            min-height: 120px;
+            max-height: none;
+            overflow-y: visible;
+            line-height: 1.6;
+            font-size: 1rem;
+            color: var(--gray-800);
+            display: none;
+        }
+
+        .response-container.visible {
+            display: block;
+        }
+
+        /* Markdown Styles */
+        .response-container h1,
+        .response-container h2,
+        .response-container h3,
+        .response-container h4,
+        .response-container h5,
+        .response-container h6 {
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        .response-container h1 { font-size: 2em; }
+        .response-container h2 { font-size: 1.5em; }
+        .response-container h3 { font-size: 1.25em; }
+        .response-container h4 { font-size: 1em; }
+
+        .response-container p {
+            margin-bottom: 1em;
+        }
+
+        .response-container ul,
+        .response-container ol {
+            margin-bottom: 1em;
+            padding-left: 2em;
+        }
+
+        .response-container li {
+            margin-bottom: 0.5em;
+        }
+
+        .response-container code {
+            background-color: var(--gray-200);
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+
+        .response-container pre {
+            background-color: var(--gray-200);
+            padding: 1em;
+            border-radius: var(--radius-md);
+            overflow-x: auto;
+            margin-bottom: 1em;
+        }
+
+        .response-container pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+
+        .response-container blockquote {
+            border-left: 4px solid var(--gray-300);
+            padding-left: 1em;
+            margin-left: 0;
+            margin-bottom: 1em;
+            color: var(--gray-600);
+        }
+
+        .pulse {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            margin-left: 4px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.2; }
+            50% { opacity: 1; }
+            100% { opacity: 0.2; }
+        }
+
+        .footer {
+            text-align: center;
+            padding: var(--spacing-6);
+            color: var(--gray-600);
+            font-size: 0.875rem;
+            margin-top: auto;
+        }
+
+        @media (max-width: 640px) {
+            .card {
+                padding: var(--spacing-4);
+                margin: var(--spacing-4) 0;
+            }
+            
+            .title {
+                font-size: 1.5rem;
+            }
+            
+            .subtitle {
+                font-size: 0.875rem;
+            }
+            
+            textarea, button {
+                padding: var(--spacing-3);
+            }
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            font-style: italic;
+            color: var(--gray-600);
+        }
+
+        .dot {
+            margin-left: 4px;
+            animation: dot-pulse 1.5s infinite;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes dot-pulse {
+            0% { opacity: 0.2; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0.2; transform: scale(0.8); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center">
-    <div class="w-full max-w-xl p-8 bg-gray-800 rounded-xl shadow-lg">
-        <h1 class="text-3xl font-bold mb-6 text-center">Text Generator</h1>
+<body>
+    <div class="container">
+        <div class="card fade-in">
+            <div class="header">
+                <h1 class="title">AI Text Assistant</h1>
+                <p class="subtitle">How can I help you today? Ask me anything.</p>
+            </div>
 
-        <textarea id="prompt" class="w-full p-3 text-gray-900 rounded" rows="4" placeholder="Enter prompt..."></textarea>
+            <div class="input-group">
+                <textarea id="prompt" placeholder="Type your question or prompt here..."></textarea>
+            </div>
 
-        <button id="generateBtn" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded">
-            Generate
-        </button>
+            <button id="generateBtn">
+                Generate Response
+            </button>
 
-        <div id="response" class="mt-6 p-4 bg-gray-700 rounded whitespace-pre-wrap"></div>
+            <div id="response" class="response-container"></div>
+        </div>
     </div>
 
-    <script>
-document.getElementById("generateBtn").addEventListener("click", async () => {
-    const prompt = document.getElementById("prompt").value;
-    const responseDiv = document.getElementById("response");
-    responseDiv.textContent = "⏳ Generating...";
+    <footer class="footer">
+        Created at UEM - CSE (AI & ML) - IEDC &copy; <span id="year"></span>
+    </footer>
 
-    try {
-        const res = await fetch("https://server.aimliedc.tech/text-generator/generate_text/", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": getCookie("csrftoken")
-            },
-            body: JSON.stringify({ prompt })
+    <script>
+        // Set the current year dynamically
+        document.getElementById("year").textContent = new Date().getFullYear();
+
+        document.getElementById("generateBtn").addEventListener("click", async () => {
+            const prompt = document.getElementById("prompt").value;
+            const responseDiv = document.getElementById("response");
+            
+            if (!prompt.trim()) {
+                responseDiv.innerHTML = '<span style="color: var(--error);">Please enter a prompt first.</span>';
+                responseDiv.classList.add('visible');
+                return;
+            }
+            
+            responseDiv.innerHTML = '<div class="loading">Generating<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>';
+            responseDiv.classList.add('visible');
+
+            try {
+                const res = await fetch("https://server.aimliedc.tech/text-generator/generate_text/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": getCookie("csrftoken")
+                    },
+                    body: JSON.stringify({ prompt })
+                });
+
+                if (!res.ok) {
+                    responseDiv.innerHTML = `<span style="color: var(--error);">❌ Error: ${res.statusText}</span>`;
+                    return;
+                }
+
+                const data = await res.json();
+                const fullText = data.text;
+                responseDiv.textContent = "";  // clear loading message
+
+                // Convert markdown to HTML
+                const converter = new showdown.Converter();
+                let currentText = '';
+                let index = 0;
+                
+                const interval = setInterval(() => {
+                    if (index < fullText.length) {
+                        currentText += fullText.charAt(index);
+                        responseDiv.innerHTML = converter.makeHtml(currentText);
+                        index++;
+                    } else {
+                        clearInterval(interval);
+                    }
+                }, 5); // much faster typing speed (5ms per character)
+
+            } catch (error) {
+                console.error(error);
+                responseDiv.innerHTML = `<span style="color: var(--error);">❌ Network error or server issue.</span>`;
+            }
         });
 
-        if (!res.ok) {
-            responseDiv.textContent = "❌ Error: " + res.statusText;
-            return;
-        }
-
-        const data = await res.json();
-        const fullText = data.text;
-        responseDiv.textContent = "";  // clear loading message
-
-        // Simulate typing effect
-        let index = 0;
-        const interval = setInterval(() => {
-            if (index < fullText.length) {
-                responseDiv.textContent += fullText.charAt(index);
-                index++;
-            } else {
-                clearInterval(interval);
+        // Enter key functionality
+        document.getElementById("prompt").addEventListener("keydown", function(event) {
+            if (event.key === "Enter" && event.ctrlKey) {
+                document.getElementById("generateBtn").click();
             }
-        }, 25); // typing speed (ms per char)
+        });
 
-    } catch (error) {
-        console.error(error);
-        responseDiv.textContent = "❌ Network error or server issue.";
-    }
-});
-
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let cookie of cookies) {
-            cookie = cookie.trim();
-            if (cookie.startsWith(name + '=')) {
-                cookieValue = decodeURIComponent(cookie.slice(name.length + 1));
-                break;
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let cookie of cookies) {
+                    cookie = cookie.trim();
+                    if (cookie.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.slice(name.length + 1));
+                        break;
+                    }
+                }
             }
+            return cookieValue;
         }
-    }
-    return cookieValue;
-}
-</script>
-
-
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
 </body>
-
 </html>
