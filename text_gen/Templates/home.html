@@ -25,7 +25,7 @@
 
         responseDiv.textContent = "⏳ Generating...";
 
-        const res = await fetch("/generate_text/", {
+        const res = await fetch("https://server.aimliedc.tech/text-generator/generate_text/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
